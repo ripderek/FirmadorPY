@@ -5,15 +5,49 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 import qrcode
 import io
 from endesive.pdf import cms
+import re
+from canvas import crear_canvas
+import os
+from guardarqr import guardaqrruta
+from guardarcanvas import guardacanvasruta
 
 #python server.py 
 def firmar(contraseña, certificado, pdf):
+
+    #Movi----------------------------------------------------------------------
+    # with open("cert.p12", "rb") as fp:
+    p12 = pkcs12.load_key_and_certificates(
+        certificado.read(), contraseña.encode("ascii"), backends.default_backend()
+    )
+    #p12[1].
+    
+    #sacar la cadena que tiene el nombre
+    subject = p12[1].subject.rfc4514_string()
+
+    # Usamos una expresión regular para buscar el valor del atributo CN el cual tiene el nombre
+    match = re.search(r'CN=([^,]+)', subject)
+    nombre = match.group(1)
+    
+    print("Emisor del certificado:", nombre)
+
+    #Fecha Actual
+    fecha_a = datetime.datetime.now()
+    fecha_actual = fecha_a.date()
+    print("Fecha :", fecha_actual)
+
+    #Movi----------------------
+
+    ruta_completa = guardaqrruta()
+
+    #----------------------------
+
     #datos para el qr:
-    nombre = "Raul Steven Coello Castillo"
-    fecha = "2023-09-05"
-    aplicacion ="SGD"
+    #nombre = "JuanJosejarabarrra Klindesr Arve saciases"
+    fecha = fecha_actual
     empresa = "Xtintor"
-    datos = f"Firmado por: {nombre}, Fecha: {fecha}, Razon: {empresa}"
+    localiza = "UTEQ"
+    validar =  "www.firmadigital.gob.ec"
+    datos = f"Firmado por: {nombre},\nRazon: {empresa},\nLocalizacion: {localiza},\nFecha: {fecha},\nValidar con: {validar}"
     #construir el qr 
     qr = qrcode.QRCode(
     version=1,
@@ -24,7 +58,17 @@ def firmar(contraseña, certificado, pdf):
     qr.add_data(datos)
     qr.make(fit=True)
     img = qr.make_image(fill='black',back_color='white')
-    img.save('qrtelecapp.png')
+    img.save(ruta_completa)
+
+    #Generar el canvas----------------------------------
+    # Utilizar la función para crear el canvas
+    qr_imagen_path = ruta_completa  #ubicación real de la imagen QR
+    canvas = crear_canvas(nombre, qr_imagen_path)
+
+    # Guardar el canvas en un archivo o mostrarlo en pantalla
+    canvas.save(guardacanvasruta())
+
+    #--------------------------------------------
 
     #coordenadas
     
@@ -44,21 +88,17 @@ def firmar(contraseña, certificado, pdf):
         "sigandcertify": True,
         # A=izquierda  B=arriba  C=A+60   D=B+60  
         #        "signaturebox": (194, 510, 254, 570), 
-        "signaturebox": (194, 510, 254, 570), 
+        #"signaturebox": (194, 120, 254, 180),
+        "signaturebox": (194, 120, 320, 180),  
         #"signature": nombre,
-        "signature_img": "qrtelecapp.png",
+        "signature_img": "canvas.png",
         "contact": "hola@ejemplo.com",
         "location": "Ubicación",
         "signingdate": date,
         "reason": "Razón",
         "password": contraseña,
     }
-    # with open("cert.p12", "rb") as fp:
-    p12 = pkcs12.load_key_and_certificates(
-        certificado.read(), contraseña.encode("ascii"), backends.default_backend()
-    )
-    #p12[1].
-    
+
 
     #datau = open(fname, "rb").read()
     datau = pdf.read()
