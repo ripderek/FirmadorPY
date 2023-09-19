@@ -12,7 +12,7 @@ from guardarqr import guardaqrruta
 from guardarcanvas import guardacanvasruta
 
 #python server.py 
-def firmar(contraseña, certificado, pdf):
+def firmar(contraseña, certificado, pdf,posicion_x,posicion_y,numero_paguina):
 
     #Movi----------------------------------------------------------------------
     # with open("cert.p12", "rb") as fp:
@@ -81,7 +81,7 @@ def firmar(contraseña, certificado, pdf):
         "aligned": 0,
         "sigflags": 3,
         "sigflagsft": 120,
-        "sigpage": 1,
+        "sigpage": int(numero_paguina),
         "sigbutton": True,
         "sigfield": "Signature1",
         "auto_sigfield": True,
@@ -89,7 +89,7 @@ def firmar(contraseña, certificado, pdf):
         # A=izquierda  B=arriba  C=A+60   D=B+60  
         #        "signaturebox": (194, 510, 254, 570), 
         #"signaturebox": (194, 120, 254, 180),
-        "signaturebox": (194, 120, 320, 180),  
+        "signaturebox": (int(posicion_x), int(posicion_y), int(posicion_x)+120, int(posicion_y)+60),  
         #"signature": nombre,
         "signature_img": "canvas.png",
         "contact": "hola@ejemplo.com",

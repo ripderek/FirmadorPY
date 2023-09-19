@@ -16,9 +16,13 @@ def procesar():
     pdf = request.files.get("pdf")
     firma = request.files.get("firma")
     contraseña = request.form.get("palabra_secreta")
+    #nuevos parametros para la posicion en x, y y el numero de paguina
+    posicion_x = request.form.get("posicion_x")
+    posicion_y = request.form.get("posicion_y")
+    numero_paguina = request.form.get("numero_paguina")
     archivo_pdf_para_enviar_al_cliente = io.BytesIO()
     try:
-        datau, datas = firmar(contraseña, firma, pdf)
+        datau, datas = firmar(contraseña, firma, pdf,posicion_x,posicion_y,numero_paguina)
         archivo_pdf_para_enviar_al_cliente.write(datau)
         archivo_pdf_para_enviar_al_cliente.write(datas)
         archivo_pdf_para_enviar_al_cliente.seek(0)
